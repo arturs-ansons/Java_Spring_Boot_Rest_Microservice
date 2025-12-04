@@ -137,3 +137,6 @@ Used for:
 
 ### User Flow (Authentication → Banking → Trading)
 
+<img width="1304" height="705" alt="Screenshot (5)" src="https://github.com/user-attachments/assets/0e96bf89-1338-4a1d-a701-0edf424a3b7f" />
+
+
