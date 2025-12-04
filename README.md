@@ -122,18 +122,6 @@ Used for:
 
 ---
 
-## 🔁 CI/CD (Optional)
-
-Supports CI/CD pipelines (GitHub Actions or similar):
-
-- Run tests  
-- Lint & build services  
-- Build Docker images  
-- Deploy microservices  
-- Start event consumers automatically  
-
----
-
 ## 🧪 Testing
 
 - Unit & integration tests for:
