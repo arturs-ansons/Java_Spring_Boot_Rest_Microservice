@@ -1,4 +1,4 @@
-💳 Banking Microservices Platform
+## 💳 Banking Microservices Platform
 
 A **Banking & Crypto Trading Microservices Platform** built with **Spring Boot**, **Eureka**, **RabbitMQ**, **React**, and a **Node.js API Gateway**.  
 This system provides secure authentication, client onboarding, account management, banking transactions, crypto trading, and live market data — all using a scalable microservices architecture.
