@@ -1,0 +1,15 @@
+
+
+services:
+  gateway:
+    build: .
+    container_name: frontend-gateway
+    ports:
+      - "5000:5000"
+    networks:
+      - eureka_app-network
+    restart: unless-stopped
+
+networks:
+  eureka_app-network:
+    external: true

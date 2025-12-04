@@ -1,0 +1,59 @@
+services:
+  account-postgres:
+    image: postgres:15
+    container_name: account-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accountdb
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    volumes:
+      - account-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d accountdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  account-service:
+    build: . 
+    container_name: account-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_APPLICATION_NAME: account-service
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://account-postgres:5432/accountdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      JWT_SECRET: mySuperSecretKeyThatIsAtLeast32CharactersLong!
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+    depends_on:
+      account-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  account-postgres-data:
+
+networks:
+  app-network:
+    external: true
+    name: eureka_app-network

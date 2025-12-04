@@ -1,0 +1,77 @@
+
+services:
+  client-postgres:
+    image: postgres:15
+    container_name: client-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: clientdb
+    ports:
+      - "5434:5432"
+    networks:
+      - app-network
+    volumes:
+      - client-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d clientdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  client-service:
+    build: .
+    container_name: client-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_APPLICATION_NAME: client-service
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://client-postgres:5432/clientdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      JWT_SECRET: mySuperSecretKeyThatIsAtLeast32CharactersLong!
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+    depends_on:
+      client-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: client-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@client.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8084:80"
+    networks:
+      - app-network
+    depends_on:
+      - client-postgres
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  client-postgres-data:
+  pgadmin-data:
+
+networks:
+  app-network:
+    external: true
+    name: eureka_app-network
